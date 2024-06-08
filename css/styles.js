@@ -19,9 +19,9 @@ export const styles = StyleSheet.create({
   },
   platypiText: {
     fontFamily: 'Platypi-Regular',
-    fontSize: 60,
   },
   robotoSlabText: {
     fontFamily: 'RobotoSlab-Regular',
+
   },
 });

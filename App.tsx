@@ -1,85 +1,35 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState } from 'react';
+import { View, Button, Text } from 'react-native';
+import HomeScreen from './pages/HomeScreen';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import { styles } from './css/styles';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+type ScreenProps = {
+  navigate: (screenName: string) => void;
+};
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+function OtherScreen({ navigate }: ScreenProps): JSX.Element {
   return (
-    <View>
-      <Text style={styles.platypiText}>
-        {title}
-      </Text>
-
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Other Screen</Text>
+      <Button title="Go back" onPress={() => navigate('Home')} />
     </View>
   );
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+export default function App(): JSX.Element {
+  const [currentScreen, setCurrentScreen] = useState<string>('Home');
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const navigate = (screenName: string): void => {
+    setCurrentScreen(screenName);
   };
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-   
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+  let screenComponent;
+  if (currentScreen === 'Home') {
+    screenComponent = <HomeScreen navigate={navigate} />;
+  } else if (currentScreen === 'Other') {
+    screenComponent = <OtherScreen navigate={navigate} />;
+  }
+
+  return <View style={{ flex: 1 }}>{screenComponent}</View>;
 }
-
-
-
-export default App;
