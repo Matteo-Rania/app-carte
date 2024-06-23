@@ -1,7 +1,7 @@
-// app/(tabs)/index.tsx
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import globalStyles from '../../assets/styles/globalStyles';
 
 export default function HomeTab() {
   const router = useRouter();
@@ -11,37 +11,54 @@ export default function HomeTab() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.cardText}>Start</Text>
-        <Button title="Start" onPress={handleStartPress} />
+    <View style={globalStyles.container}>
+      <View style={globalStyles.card}>
+        {/* Angolo in alto a sinistra */}
+        <View style={styles.cardCornerTopLeft}>
+          <Text style={styles.cardCornerText}>
+            K
+          </Text>
+          <Text style={styles.cardCornerSymbol}>♠</Text>
+
+        </View>
+
+        {/* Angolo in basso a destra */}
+        <View style={styles.cardCornerBottomRight}>
+          <Text style={styles.cardCornerText}>
+            K
+          </Text>
+          <Text style={styles.cardCornerSymbol}>♠</Text>
+        </View>
+  
+        <TouchableOpacity style={globalStyles.buttonContainer} onPress={handleStartPress}>
+          <Text style={globalStyles.buttonText}>Start</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
+  cardCornerTopLeft: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
-  card: {
-    width: 200,
-    padding: 20,
+  cardCornerSymbol: {
+    fontSize: 16,
+  },
+  cardCornerBottomRight: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
+    transform: [{ rotate: '180deg' }],
   },
-  cardText: {
+  cardCornerText: {
     fontSize: 20,
-    marginBottom: 10,
-  },
+    fontWeight: 'bold',
+  }
 });
