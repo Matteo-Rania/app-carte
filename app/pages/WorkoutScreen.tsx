@@ -1,10 +1,11 @@
+// app/pages/WorkoutScreen.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 export default function WorkoutScreen() {
   return (
     <View style={styles.container}>
-      <Text>This is the Workout Screen!</Text>
+      <Text style={styles.text}>Welcome to the Workout Screen!</Text>
     </View>
   );
 }
@@ -14,6 +15,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  text: {
+    fontSize: 24,
+    fontWeight: 'bold',
   },
 });
-    
