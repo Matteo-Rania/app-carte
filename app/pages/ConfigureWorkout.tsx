@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { MaterialCommunityIcons } from '@expo/vector-icons'; // Importa l'icona desiderata
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import globalStyles from '../../assets/styles/globalStyles';
-import levelPageStyles from '../../assets/styles/LevelPage';
 
 type SuitType = '♠' | '♥' | '♦' | '♣';
 
 interface CardState {
   flipped: boolean;
+  rotation: Animated.Value;
 }
 
 export default function NewPage() {
@@ -19,15 +19,16 @@ export default function NewPage() {
     '♦': 'option1',
     '♣': 'option1',
   });
+
   const [cardStates, setCardStates] = useState<Record<SuitType, CardState>>({
-    '♠': { flipped: false },
-    '♥': { flipped: false },
-    '♦': { flipped: false },
-    '♣': { flipped: false },
+    '♠': { flipped: false, rotation: new Animated.Value(0) },
+    '♥': { flipped: false, rotation: new Animated.Value(0) },
+    '♦': { flipped: false, rotation: new Animated.Value(0) },
+    '♣': { flipped: false, rotation: new Animated.Value(0) },
   });
 
   const options = [
-    { label: 'select dsadasdas', value: 'option1' },
+    { label: 'Option 1', value: 'option1' },
     { label: 'Option 2', value: 'option2' },
     { label: 'Option 3', value: 'option3' },
   ];
@@ -40,48 +41,75 @@ export default function NewPage() {
   };
 
   const handleCardFlip = (suit: SuitType) => {
+    const cardState = cardStates[suit];
+    const toValue = cardState.flipped ? 0 : 180;
+
+    Animated.timing(cardState.rotation, {
+      toValue,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
+
     setCardStates(prevState => ({
       ...prevState,
-      [suit]: { flipped: !prevState[suit].flipped },
+      [suit]: {
+        ...prevState[suit],
+        flipped: !prevState[suit].flipped,
+      },
     }));
   };
 
-  const renderCardBack = (suit: SuitType) => {
-    return (
-      <View style={styles.cardBack}>
-        <Text>Retro carta {suit}</Text>
-      </View>
-    );
-  };
+  const renderCardBack = (suit: SuitType) => (
+    <View style={styles.cardBack}>
+      <Text>Retro carta {suit}</Text>
+    </View>
+  );
 
   const cards = suits.map((suit, index) => {
-    const isFlipped = cardStates[suit].flipped;
+    const cardState = cardStates[suit];
+    const rotateY = cardState.rotation.interpolate({
+      inputRange: [0, 180],
+      outputRange: ['0deg', '180deg'],
+    });
+
     return (
-      <View key={index} style={styles.card}>
-        {/* Angolo in alto a sinistra */}
-        <View style={styles.cardCornerTopLeft}>
-          <Text style={styles.cardCornerSymbol}>{suit}</Text>
-        </View>
-        {/* Angolo in basso a destra */}
-        <View style={styles.cardCornerBottomRight}>
-          <Text style={styles.cardCornerSymbol}>{suit}</Text>
-        </View>
-        {/* Punto interrogativo cerchiato in alto a destra */}
+      <View key={index} style={styles.cardContainer}>
+        <Animated.View
+          style={[
+            styles.card,
+            { transform: [{ rotateY }] },
+            { backfaceVisibility: 'hidden' },
+          ]}
+        >
+          {cardState.flipped ? (
+            <Animated.View style={styles.cardBack}>
+              <Text>Retro carta {suit}</Text>
+            </Animated.View>
+          ) : (
+            <>
+              <View style={styles.cardCornerTopLeft}>
+                <Text style={styles.cardCornerSymbol}>{suit}</Text>
+              </View>
+              <View style={styles.cardCornerBottomRight}>
+                <Text style={styles.cardCornerSymbol}>{suit}</Text>
+              </View>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={selectedValues[suit]}
+                  style={styles.picker}
+                  onValueChange={(itemValue) => handleValueChange(suit, itemValue)}
+                >
+                  {options.map(option => (
+                    <Picker.Item key={option.value} label={option.label} value={option.value} />
+                  ))}
+                </Picker>
+              </View>
+            </>
+          )}
+        </Animated.View>
         <TouchableOpacity style={styles.questionMark} onPress={() => handleCardFlip(suit)}>
           <MaterialCommunityIcons name="help-circle-outline" size={24} color="black" />
         </TouchableOpacity>
-        {/* Select Picker */}
-        {isFlipped ? renderCardBack(suit) : (
-          <Picker
-            selectedValue={selectedValues[suit]}
-            style={levelPageStyles.picker}
-            onValueChange={(itemValue) => handleValueChange(suit, itemValue)}
-          >
-            {options.map((option) => (
-              <Picker.Item key={option.value} label={option.label} value={option.value} />
-            ))}
-          </Picker>
-        )}
       </View>
     );
   });
@@ -98,20 +126,23 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
   },
+  cardContainer: {
+    position: 'relative',
+    margin: 10,
+  },
   card: {
     width: 140,
-    height: 240, 
+    height: 240,
     backgroundColor: '#fff',
     borderRadius: 10,
-    elevation: 3, 
-    shadowColor: '#000', 
+    elevation: 3,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
-    shadowRadius: 2, 
+    shadowRadius: 2,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative', 
-    margin: 10,
+    backfaceVisibility: 'hidden',
   },
   cardBack: {
     ...StyleSheet.absoluteFillObject,
@@ -120,7 +151,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    transform: [{ rotateY: '180deg' }], 
+  },
+  pickerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  picker: {
+    width: 120, // Imposta una larghezza fissa
+    height: 50, // Imposta un'altezza fissa
   },
   cardCornerTopLeft: {
     position: 'absolute',
@@ -144,6 +183,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
+    zIndex: 1,
   },
   row: {
     flexDirection: 'row',
