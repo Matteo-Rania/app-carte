@@ -59,17 +59,15 @@ export default function NewPage() {
     }));
   };
 
-  const renderCardBack = (suit: SuitType) => (
-    <View style={styles.cardBack}>
-      <Text>Retro carta {suit}</Text>
-    </View>
-  );
-
   const cards = suits.map((suit, index) => {
     const cardState = cardStates[suit];
-    const rotateY = cardState.rotation.interpolate({
+    const rotateYFront = cardState.rotation.interpolate({
       inputRange: [0, 180],
       outputRange: ['0deg', '180deg'],
+    });
+    const rotateYBack = cardState.rotation.interpolate({
+      inputRange: [0, 180],
+      outputRange: ['180deg', '360deg'],
     });
 
     return (
@@ -77,36 +75,40 @@ export default function NewPage() {
         <Animated.View
           style={[
             styles.card,
-            { transform: [{ rotateY }] },
-            { backfaceVisibility: 'hidden' },
+            { transform: [{ rotateY: rotateYFront }] },
           ]}
         >
-          {cardState.flipped ? (
-            <Animated.View style={styles.cardBack}>
-              <Text>Retro carta {suit}</Text>
-            </Animated.View>
-          ) : (
-            <>
-              <View style={styles.cardCornerTopLeft}>
-                <Text style={styles.cardCornerSymbol}>{suit}</Text>
-              </View>
-              <View style={styles.cardCornerBottomRight}>
-                <Text style={styles.cardCornerSymbol}>{suit}</Text>
-              </View>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={selectedValues[suit]}
-                  style={styles.picker}
-                  onValueChange={(itemValue) => handleValueChange(suit, itemValue)}
-                >
-                  {options.map(option => (
-                    <Picker.Item key={option.value} label={option.label} value={option.value} />
-                  ))}
-                </Picker>
-              </View>
-            </>
-          )}
+          <View style={styles.cardFront}>
+            <View style={styles.cardCornerTopLeft}>
+              <Text style={styles.cardCornerSymbol}>{suit}</Text>
+            </View>
+            <View style={styles.cardCornerBottomRight}>
+              <Text style={styles.cardCornerSymbol}>{suit}</Text>
+            </View>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={selectedValues[suit]}
+                style={styles.picker}
+                onValueChange={(itemValue) => handleValueChange(suit, itemValue)}
+              >
+                {options.map(option => (
+                  <Picker.Item key={option.value} label={option.label} value={option.value} />
+                ))}
+              </Picker>
+            </View>
+          </View>
         </Animated.View>
+
+        <Animated.View
+          style={[
+            styles.card,
+            styles.cardBack,
+            { transform: [{ rotateY: rotateYBack }] },
+          ]}
+        >
+          <Text>Retro carta {suit}</Text>
+        </Animated.View>
+
         <TouchableOpacity style={styles.questionMark} onPress={() => handleCardFlip(suit)}>
           <MaterialCommunityIcons name="help-circle-outline" size={24} color="black" />
         </TouchableOpacity>
@@ -144,13 +146,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backfaceVisibility: 'hidden',
   },
+  cardFront: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   cardBack: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: '#ccc',
-    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backfaceVisibility: 'hidden',
   },
   pickerContainer: {
     flex: 1,
