@@ -28,9 +28,9 @@ export default function NewPage() {
   });
 
   const options = [
-    { label: 'Option 1', value: 'option1' },
-    { label: 'Option 2', value: 'option2' },
-    { label: 'Option 3', value: 'option3' },
+    { label: 'Option 1', value: 'option1', description: '', urlVideo: '' },
+    { label: 'Option 2', value: 'option2', },
+    { label: 'Option 3', value: 'option3', },
   ];
 
   const handleValueChange = (suit: SuitType, itemValue: string) => {
@@ -70,12 +70,19 @@ export default function NewPage() {
       outputRange: ['180deg', '360deg'],
     });
 
+    const isFrontVisible = !cardState.flipped;
+
     return (
       <View key={index} style={styles.cardContainer}>
+        {/* Fronte carta */}
         <Animated.View
           style={[
             styles.card,
-            { transform: [{ rotateY: rotateYFront }] },
+            { 
+              transform: [{ rotateY: rotateYFront }], 
+              zIndex: isFrontVisible ? 1 : 0, 
+              opacity: isFrontVisible ? 1 : 0 
+            },
           ]}
         >
           <View style={styles.cardFront}>
@@ -99,11 +106,16 @@ export default function NewPage() {
           </View>
         </Animated.View>
 
+        {/* Retro carta */}
         <Animated.View
           style={[
             styles.card,
             styles.cardBack,
-            { transform: [{ rotateY: rotateYBack }] },
+            { 
+              transform: [{ rotateY: rotateYBack }], 
+              zIndex: isFrontVisible ? 0 : 1, 
+              opacity: isFrontVisible ? 0 : 1 
+            },
           ]}
         >
           <Text>Retro carta {suit}</Text>
