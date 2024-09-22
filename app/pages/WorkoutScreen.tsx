@@ -71,6 +71,9 @@ export default function WorkoutScreen() {
           <Text style={styles.cardText}>Allenamento finito</Text>
         )}
       </View>
+      <View style={styles.messageContainer}>
+        <Text style={styles.messageText}>Mancano {deck.length} carte</Text>
+      </View>
     </View>
   );
 }
@@ -80,6 +83,7 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    flex: 1,
   },
   cardContainer: {
     justifyContent: 'center',
@@ -100,6 +104,13 @@ const styles = StyleSheet.create({
   },
   cardText: {
     fontSize: 30,
+    fontWeight: 'bold',
+  },
+  messageContainer: {
+    marginTop: 20,
+  },
+  messageText: {
+    fontSize: 20,
     fontWeight: 'bold',
   },
 });
