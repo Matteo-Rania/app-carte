@@ -7,7 +7,7 @@ export default function HomeTab() {
   const router = useRouter();
 
   const handleStartPress = () => {
-    router.push('/pages/WorkoutScreen');
+    router.push('/pages/SelectWorkoutType');
   };
 
   return (

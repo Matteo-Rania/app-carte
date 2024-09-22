@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native
 import { Picker } from '@react-native-picker/picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import globalStyles from '../../assets/styles/globalStyles';
+import { useRouter } from 'expo-router';
 
 type SuitType = '♠' | '♥' | '♦' | '♣';
 
@@ -12,12 +13,14 @@ interface CardState {
 }
 
 export default function NewPage() {
+  const router = useRouter();
+  
   const suits: SuitType[] = ['♠', '♥', '♦', '♣'];
   const [selectedValues, setSelectedValues] = useState<Record<SuitType, string>>({
-    '♠': 'option1',
-    '♥': 'option1',
-    '♦': 'option1',
-    '♣': 'option1',
+    '♠': '',
+    '♥': '',
+    '♦': '',
+    '♣': '',
   });
 
   const [cardStates, setCardStates] = useState<Record<SuitType, CardState>>({
@@ -28,9 +31,9 @@ export default function NewPage() {
   });
 
   const options = [
-    { label: 'Option 1', value: 'option1', description: '', urlVideo: '' },
-    { label: 'Option 2', value: 'option2', },
-    { label: 'Option 3', value: 'option3', },
+    { label: 'Option 1', value: 'option1' },
+    { label: 'Option 2', value: 'option2' },
+    { label: 'Option 3', value: 'option3' },
   ];
 
   const handleValueChange = (suit: SuitType, itemValue: string) => {
@@ -58,6 +61,12 @@ export default function NewPage() {
       },
     }));
   };
+
+  const handleStartPress = () => {
+    router.push('/pages/WorkoutScreen'); 
+  };
+
+  const allOptionsSelected = Object.values(selectedValues).every(value => value !== '');
 
   const cards = suits.map((suit, index) => {
     const cardState = cardStates[suit];
@@ -98,6 +107,7 @@ export default function NewPage() {
                 style={styles.picker}
                 onValueChange={(itemValue) => handleValueChange(suit, itemValue)}
               >
+                <Picker.Item label="Select an option..." value="" />
                 {options.map(option => (
                   <Picker.Item key={option.value} label={option.label} value={option.value} />
                 ))}
@@ -132,6 +142,12 @@ export default function NewPage() {
     <View style={[globalStyles.container, styles.container]}>
       <View style={styles.row}>{cards.slice(0, 2)}</View>
       <View style={styles.row}>{cards.slice(2, 4)}</View>
+
+      {allOptionsSelected && (
+        <TouchableOpacity style={globalStyles.buttonContainer} onPress={handleStartPress}>
+          <Text style={globalStyles.buttonText}>Start</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -177,8 +193,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   picker: {
-    width: 120, // Imposta una larghezza fissa
-    height: 50, // Imposta un'altezza fissa
+    width: 120,
+    height: 50,
   },
   cardCornerTopLeft: {
     position: 'absolute',

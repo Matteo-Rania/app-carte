@@ -1,68 +1,105 @@
-import React, { useState } from 'react';
-import { View, Text, Button, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import globalStyles from '../../assets/styles/globalStyles';
-import levelPageStyles from '../../assets/styles/LevelPage';
-import { useRouter } from 'expo-router';
 
+type SuitType = '♠' | '♥' | '♦' | '♣';
+type Card = {
+  suit: SuitType;
+  value: number;
+};
+
+const suits: SuitType[] = ['♠', '♥', '♦', '♣'];
+
+const generateDeck = (): Card[] => {
+  const deck: Card[] = [];
+  suits.forEach(suit => {
+    for (let value = 1; value <= 10; value++) {
+      deck.push({ suit, value });
+    }
+  });
+  return deck;
+};
 
 export default function WorkoutScreen() {
-  const [selectedOption1, setSelectedOption1] = useState(null);
-  const [selectedOption2, setSelectedOption2] = useState(null);
+  const [deck, setDeck] = useState<Card[]>(generateDeck());
+  const [currentCard, setCurrentCard] = useState<Card | null>(null);
+  const [cardOpacity] = useState(new Animated.Value(1));
 
-  const options1 = [
-    { label: 'Option 1', value: 'option1' },
-    { label: 'Option 2', value: 'option2' },
-    { label: 'Option 3', value: 'option3' },
-  ];
+  useEffect(() => {
+    drawRandomCard(); // Pesca la prima carta casuale all'inizio
+  }, []);
 
-  const options2 = [
-    { label: 'Option A', value: 'optionA' },
-    { label: 'Option B', value: 'optionB' },
-    { label: 'Option C', value: 'optionC' },
-  ];
-  const router = useRouter();
+  const drawRandomCard = () => {
+    if (deck.length > 0) {
+      const randomIndex = Math.floor(Math.random() * deck.length);
+      const selectedCard = deck[randomIndex];
 
+      setCurrentCard(selectedCard);
+      setDeck(prevDeck => prevDeck.filter((_, index) => index !== randomIndex)); // Rimuovi la carta dal mazzo
 
-  const handleStartPress = () => {
-    router.push('/pages/ConfigureWorkout');
+      Animated.timing(cardOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      setCurrentCard(null); // Nessuna carta rimasta
+    }
+  };
+
+  const handlePress = () => {
+    Animated.timing(cardOpacity, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      drawRandomCard(); // Pesca una nuova carta
+      cardOpacity.setValue(1); // Ripristina l'opacità
+    });
   };
 
   return (
-    <View style={[globalStyles.container, levelPageStyles.container]}>
-      <Text style={levelPageStyles.label}>Select Option 1:</Text>
-      <View style={levelPageStyles.pickerContainer}>
-        <Picker
-          selectedValue={selectedOption1}
-          style={levelPageStyles.picker}
-          onValueChange={(itemValue) => setSelectedOption1(itemValue)}
-        >
-          <Picker.Item label="Select an option..." value={null} />
-          {options1.map((option) => (
-            <Picker.Item key={option.value} label={option.label} value={option.value} />
-          ))}
-        </Picker>
+    <View style={[globalStyles.container, styles.container]}>
+      <View style={styles.cardContainer}>
+        {currentCard ? (
+          <TouchableOpacity onPress={handlePress}>
+            <Animated.View style={[styles.card, { opacity: cardOpacity }]}>
+              <Text style={styles.cardText}>{currentCard.value}{currentCard.suit}</Text>
+            </Animated.View>
+          </TouchableOpacity>
+        ) : (
+          <Text style={styles.cardText}>Allenamento finito</Text>
+        )}
       </View>
-
-      <Text style={levelPageStyles.label}>Select Option 2:</Text>
-      <View style={levelPageStyles.pickerContainer}>
-        <Picker
-          selectedValue={selectedOption2}
-          style={levelPageStyles.picker}
-          onValueChange={(itemValue) => setSelectedOption2(itemValue)}
-        >
-          <Picker.Item label="Select an option..." value={null} />
-          {options2.map((option) => (
-            <Picker.Item key={option.value} label={option.label} value={option.value} />
-          ))}
-        </Picker>
-      </View>
-
-      {selectedOption1 && selectedOption2 && (
-       <TouchableOpacity style={globalStyles.buttonContainer} onPress={handleStartPress}>
-       <Text style={globalStyles.buttonText}>Start</Text>
-     </TouchableOpacity>
-      )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  card: {
+    width: 140,
+    height: 240,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+});

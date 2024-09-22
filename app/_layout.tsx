@@ -31,8 +31,9 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="pages/WorkoutScreen" options={{ title: 'Workout' }} />
+        <Stack.Screen name="pages/SelectWorkoutType" options={{ title: 'SelectWorkoutType' }} />
         <Stack.Screen name="pages/ConfigureWorkout" options={{ title: 'Configure' }} />
+        <Stack.Screen name="pages/WorkoutScreen" options={{ title: 'Workout' }} />
       </Stack>
     </ThemeProvider>
   );
