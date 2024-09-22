@@ -31,9 +31,9 @@ export default function NewPage() {
   });
 
   const options = [
-    { label: 'Option 1', value: 'option1' },
-    { label: 'Option 2', value: 'option2' },
-    { label: 'Option 3', value: 'option3' },
+    { label: 'Option 1', value: 'option1', url: 'https://www.youtube.com/watch?v=N4fzbBv4BFI' },
+    { label: 'Option 2', value: 'option2', url: 'https://www.youtube.com/watch?v=N4fzbBv4BFI' },
+    { label: 'Option 3', value: 'option3', url: 'https://www.youtube.com/watch?v=57Cl_ANP1LY' },
   ];
 
   const handleValueChange = (suit: SuitType, itemValue: string) => {
@@ -80,6 +80,9 @@ export default function NewPage() {
     });
 
     const isFrontVisible = !cardState.flipped;
+
+    const selectedOption = options.find(option => option.value === selectedValues[suit]);
+    const displayBackText = selectedOption ? selectedOption.url : `Retro carta ${suit}`;
 
     return (
       <View key={index} style={styles.cardContainer}>
@@ -128,7 +131,7 @@ export default function NewPage() {
             },
           ]}
         >
-          <Text>Retro carta {suit}</Text>
+          <Text>{displayBackText}</Text>
         </Animated.View>
 
         <TouchableOpacity style={styles.questionMark} onPress={() => handleCardFlip(suit)}>
