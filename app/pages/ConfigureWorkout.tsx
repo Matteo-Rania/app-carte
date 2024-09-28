@@ -1,21 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import globalStyles from '../../assets/styles/globalStyles';
 import configureWorkoutStyle from '../../assets/styles/ConfigureWorkout';
 import { useRouter } from 'expo-router';
+import CardFlip from 'react-native-card-flip';
 
 type SuitType = '♠' | '♥' | '♦' | '♣';
 
-interface CardState {
-  flipped: boolean;
-  rotation: Animated.Value;
-}
-
 export default function NewPage() {
   const router = useRouter();
-  
+
   const suits: SuitType[] = ['♠', '♥', '♦', '♣'];
   const [selectedValues, setSelectedValues] = useState<Record<SuitType, string>>({
     '♠': '',
@@ -24,81 +20,73 @@ export default function NewPage() {
     '♣': '',
   });
 
-  const [cardStates, setCardStates] = useState<Record<SuitType, CardState>>({
-    '♠': { flipped: false, rotation: new Animated.Value(0) },
-    '♥': { flipped: false, rotation: new Animated.Value(0) },
-    '♦': { flipped: false, rotation: new Animated.Value(0) },
-    '♣': { flipped: false, rotation: new Animated.Value(0) },
-  });
-
   const options = [
     { label: 'Option 1', value: 'option1', url: 'https://www.youtube.com/watch?v=N4fzbBv4BFI' },
     { label: 'Option 2', value: 'option2', url: 'https://www.youtube.com/watch?v=N4fzbBv4BFI' },
     { label: 'Option 3', value: 'option3', url: 'https://www.youtube.com/watch?v=57Cl_ANP1LY' },
   ];
 
+  // Stato per tenere traccia se la carta è girata o no
+  const [flippedStates, setFlippedStates] = useState<Record<SuitType, boolean>>({
+    '♠': false,
+    '♥': false,
+    '♦': false,
+    '♣': false,
+  });
+
   const handleValueChange = (suit: SuitType, itemValue: string) => {
     setSelectedValues(prevState => ({
       ...prevState,
       [suit]: itemValue,
     }));
-  };
 
-  const handleCardFlip = (suit: SuitType) => {
-    const cardState = cardStates[suit];
-    const toValue = cardState.flipped ? 0 : 180;
-
-    Animated.timing(cardState.rotation, {
-      toValue,
-      duration: 800,
-      useNativeDriver: true,
-    }).start();
-
-    setCardStates(prevState => ({
-      ...prevState,
-      [suit]: {
-        ...prevState[suit],
-        flipped: !prevState[suit].flipped,
-      },
-    }));
+    // Se l'utente seleziona l'opzione vuota, controlla se la carta è girata
+    if (itemValue === '') {
+      // Se la carta è girata, la rigiriamo al fronte
+      if (flippedStates[suit]) {
+        cardRefs.current[suit]?.flip();
+        setFlippedStates(prevState => ({
+          ...prevState,
+          [suit]: false,
+        }));
+      }
+    }
   };
 
   const handleStartPress = () => {
-    router.push('/pages/WorkoutScreen'); 
+    router.push('/pages/WorkoutScreen');
   };
 
   const allOptionsSelected = Object.values(selectedValues).every(value => value !== '');
 
+  // Creiamo un riferimento per ogni carta
+  const cardRefs = useRef<Record<SuitType, CardFlip>>({
+    '♠': null,
+    '♥': null,
+    '♦': null,
+    '♣': null,
+  });
+
+  const handleCardFlip = (suit: SuitType) => {
+    cardRefs.current[suit]?.flip();
+    setFlippedStates(prevState => ({
+      ...prevState,
+      [suit]: !prevState[suit],
+    }));
+  };
+
   const cards = suits.map((suit, index) => {
-    const cardState = cardStates[suit];
-    const rotateYFront = cardState.rotation.interpolate({
-      inputRange: [0, 180],
-      outputRange: ['0deg', '180deg'],
-    });
-    const rotateYBack = cardState.rotation.interpolate({
-      inputRange: [0, 180],
-      outputRange: ['180deg', '360deg'],
-    });
-
-    const isFrontVisible = !cardState.flipped;
-
     const selectedOption = options.find(option => option.value === selectedValues[suit]);
-    const displayBackText = selectedOption ? selectedOption.url : `Retro carta ${suit}`;
+    const displayBackText = selectedOption ? selectedOption.url : '';
 
     return (
       <View key={index} style={configureWorkoutStyle.cardContainer}>
-        {/* Fronte carta */}
-        <Animated.View
-          style={[
-            configureWorkoutStyle.card,
-            { 
-              transform: [{ rotateY: rotateYFront }], 
-              zIndex: isFrontVisible ? 1 : 0, 
-              opacity: isFrontVisible ? 1 : 0 
-            },
-          ]}
+        <CardFlip
+          style={configureWorkoutStyle.cardFlip}
+          ref={(card) => (cardRefs.current[suit] = card)}
         >
-          <View style={configureWorkoutStyle.cardFront}>
+          {/* Fronte carta */}
+          <View style={[configureWorkoutStyle.card, configureWorkoutStyle.cardFront]}>
             <View style={configureWorkoutStyle.cardCornerTopLeft}>
               <Text style={configureWorkoutStyle.cardCornerSymbol}>{suit}</Text>
             </View>
@@ -117,27 +105,27 @@ export default function NewPage() {
                 ))}
               </Picker>
             </View>
+            {selectedValues[suit] !== '' && (
+              <TouchableOpacity
+                style={configureWorkoutStyle.iconButton}
+                onPress={() => handleCardFlip(suit)}
+              >
+                <MaterialCommunityIcons name="help-circle-outline" size={24} color="black" />
+              </TouchableOpacity>
+            )}
           </View>
-        </Animated.View>
 
-        {/* Retro carta */}
-        <Animated.View
-          style={[
-            configureWorkoutStyle.card,
-            configureWorkoutStyle.cardBack,
-            { 
-              transform: [{ rotateY: rotateYBack }], 
-              zIndex: isFrontVisible ? 0 : 1, 
-              opacity: isFrontVisible ? 0 : 1 
-            },
-          ]}
-        >
-          <Text>{displayBackText}</Text>
-        </Animated.View>
-
-        <TouchableOpacity style={configureWorkoutStyle.questionMark} onPress={() => handleCardFlip(suit)}>
-          <MaterialCommunityIcons name="help-circle-outline" size={24} color="black" />
-        </TouchableOpacity>
+          {/* Retro carta */}
+          <View style={[configureWorkoutStyle.card, configureWorkoutStyle.cardBack]}>
+            <Text>{displayBackText}</Text>
+            <TouchableOpacity
+              style={configureWorkoutStyle.iconButton}
+              onPress={() => handleCardFlip(suit)}
+            >
+              <MaterialCommunityIcons name="close-circle-outline" size={24} color="black" />
+            </TouchableOpacity>
+          </View>
+        </CardFlip>
       </View>
     );
   });
@@ -155,4 +143,3 @@ export default function NewPage() {
     </View>
   );
 }
-
