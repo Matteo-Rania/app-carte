@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native
 import { Picker } from '@react-native-picker/picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import globalStyles from '../../assets/styles/globalStyles';
+import configureWorkoutStyle from '../../assets/styles/ConfigureWorkout';
 import { useRouter } from 'expo-router';
 
 type SuitType = '♠' | '♥' | '♦' | '♣';
@@ -85,11 +86,11 @@ export default function NewPage() {
     const displayBackText = selectedOption ? selectedOption.url : `Retro carta ${suit}`;
 
     return (
-      <View key={index} style={styles.cardContainer}>
+      <View key={index} style={configureWorkoutStyle.cardContainer}>
         {/* Fronte carta */}
         <Animated.View
           style={[
-            styles.card,
+            configureWorkoutStyle.card,
             { 
               transform: [{ rotateY: rotateYFront }], 
               zIndex: isFrontVisible ? 1 : 0, 
@@ -97,17 +98,17 @@ export default function NewPage() {
             },
           ]}
         >
-          <View style={styles.cardFront}>
-            <View style={styles.cardCornerTopLeft}>
-              <Text style={styles.cardCornerSymbol}>{suit}</Text>
+          <View style={configureWorkoutStyle.cardFront}>
+            <View style={configureWorkoutStyle.cardCornerTopLeft}>
+              <Text style={configureWorkoutStyle.cardCornerSymbol}>{suit}</Text>
             </View>
-            <View style={styles.cardCornerBottomRight}>
-              <Text style={styles.cardCornerSymbol}>{suit}</Text>
+            <View style={configureWorkoutStyle.cardCornerBottomRight}>
+              <Text style={configureWorkoutStyle.cardCornerSymbol}>{suit}</Text>
             </View>
-            <View style={styles.pickerContainer}>
+            <View style={configureWorkoutStyle.pickerContainer}>
               <Picker
                 selectedValue={selectedValues[suit]}
-                style={styles.picker}
+                style={configureWorkoutStyle.picker}
                 onValueChange={(itemValue) => handleValueChange(suit, itemValue)}
               >
                 <Picker.Item label="Select an option..." value="" />
@@ -122,8 +123,8 @@ export default function NewPage() {
         {/* Retro carta */}
         <Animated.View
           style={[
-            styles.card,
-            styles.cardBack,
+            configureWorkoutStyle.card,
+            configureWorkoutStyle.cardBack,
             { 
               transform: [{ rotateY: rotateYBack }], 
               zIndex: isFrontVisible ? 0 : 1, 
@@ -134,7 +135,7 @@ export default function NewPage() {
           <Text>{displayBackText}</Text>
         </Animated.View>
 
-        <TouchableOpacity style={styles.questionMark} onPress={() => handleCardFlip(suit)}>
+        <TouchableOpacity style={configureWorkoutStyle.questionMark} onPress={() => handleCardFlip(suit)}>
           <MaterialCommunityIcons name="help-circle-outline" size={24} color="black" />
         </TouchableOpacity>
       </View>
@@ -142,9 +143,9 @@ export default function NewPage() {
   });
 
   return (
-    <View style={[globalStyles.container, styles.container]}>
-      <View style={styles.row}>{cards.slice(0, 2)}</View>
-      <View style={styles.row}>{cards.slice(2, 4)}</View>
+    <View style={[globalStyles.container, configureWorkoutStyle.container]}>
+      <View style={configureWorkoutStyle.row}>{cards.slice(0, 2)}</View>
+      <View style={configureWorkoutStyle.row}>{cards.slice(2, 4)}</View>
 
       {allOptionsSelected && (
         <TouchableOpacity style={globalStyles.buttonContainer} onPress={handleStartPress}>
@@ -155,77 +156,3 @@ export default function NewPage() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-  },
-  cardContainer: {
-    position: 'relative',
-    margin: 10,
-  },
-  card: {
-    width: 140,
-    height: 240,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backfaceVisibility: 'hidden',
-  },
-  cardFront: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cardBack: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#ccc',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backfaceVisibility: 'hidden',
-  },
-  pickerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  picker: {
-    width: 120,
-    height: 50,
-  },
-  cardCornerTopLeft: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  cardCornerSymbol: {
-    fontSize: 16,
-  },
-  cardCornerBottomRight: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-    flexDirection: 'column',
-    alignItems: 'center',
-    transform: [{ rotate: '180deg' }],
-  },
-  questionMark: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 1,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 10,
-  },
-});
